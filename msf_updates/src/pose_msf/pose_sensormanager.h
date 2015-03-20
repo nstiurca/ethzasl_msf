@@ -84,7 +84,7 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
   ros::ServiceServer init_scale_srv_;
   ros::ServiceServer init_height_srv_;
 
-  /// Minimum initialization height. If a abs(height) is smaller than this value, 
+  /// Minimum initialization height. If a abs(height) is smaller than this value,
   /// no initialization is performed.
   static constexpr double MIN_INITIALIZATION_HEIGHT = 0.01;
 
@@ -157,7 +157,7 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
     msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
     // init values
-    g << 0, 0, 9.81;	        /// Gravity.
+    //g << 0, 0, 9.81;	        /// Gravity.
     b_w << 0, 0, 0;		/// Bias gyroscopes.
     b_a << 0, 0, 0;		/// Bias accelerometer.
 
@@ -205,7 +205,7 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
     p = p_wv + q_wv.conjugate().toRotationMatrix() * p_vc / scale
         - q.toRotationMatrix() * p_ic;
 
-    a_m = q.inverse() * g;			/// Initial acceleration.
+    a_m = q.inverse() * msf_core::constants::GRAVITY;			/// Initial acceleration.
 
     // Prepare init "measurement"
     // True means that this message contains initial sensor readings.

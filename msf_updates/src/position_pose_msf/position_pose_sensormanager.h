@@ -122,13 +122,13 @@ class PositionPoseSensorManager : public msf_core::MSF_SensorManagerROS<
   }
 
   void Init(double scale) const {
-    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ic, p_vc, p_wv,
+    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, /*g,*/ w_m, a_m, p_ic, p_vc, p_wv,
         p_ip, p_pos;
     Eigen::Quaternion<double> q, q_wv, q_ic, q_vc;
     msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
     // init values
-    g << 0, 0, 9.81;	/// Gravity.
+    //g << 0, 0, 9.81;	/// Gravity.
     b_w << 0, 0, 0;		/// Bias gyroscopes.
     b_a << 0, 0, 0;		/// Bias accelerometer.
 
@@ -202,7 +202,7 @@ class PositionPoseSensorManager : public msf_core::MSF_SensorManagerROS<
     p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
 
-    a_m = q.inverse() * g;			    /// Initial acceleration.
+    a_m = q.inverse() * msf_core::constants::GRAVITY;			    /// Initial acceleration.
 
     //TODO (slynen) Fix this.
     //we want z from vision (we did scale init), so:

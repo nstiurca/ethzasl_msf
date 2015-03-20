@@ -97,12 +97,12 @@ class PositionSensorManager : public msf_core::MSF_SensorManagerROS<
       scale = 1;
     }
 
-    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ip, p_vc;
+    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, /*g,*/ w_m, a_m, p_ip, p_vc;
     Eigen::Quaternion<double> q;
     msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
     // Init values.
-    g << 0, 0, 9.81;  /// Gravity.
+    //g << 0, 0, 9.81;  /// Gravity.
     b_w << 0, 0, 0;		/// Bias gyroscopes.
     b_a << 0, 0, 0;		/// Bias accelerometer.
 
@@ -138,7 +138,7 @@ class PositionSensorManager : public msf_core::MSF_SensorManagerROS<
     // Calculate initial attitude and position based on sensor measurements.
     p = p_vc - q.toRotationMatrix() * p_ip;
 
-    a_m = q.inverse() * g;			    /// Initial acceleration.
+    a_m = q.inverse() * msf_core::constants::GRAVITY;			    /// Initial acceleration.
 
     //prepare init "measurement"
     // True means that we will also set the initialsensor readings.

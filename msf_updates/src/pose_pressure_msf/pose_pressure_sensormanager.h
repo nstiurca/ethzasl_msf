@@ -113,13 +113,13 @@ class PosePressureSensorManager : public msf_core::MSF_SensorManagerROS<
   }
 
   void Init(double scale) const {
-    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ic, p_vc;
+    Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, /*g,*/ w_m, a_m, p_ic, p_vc;
     Eigen::Quaternion<double> q, q_wv, q_ic, q_vc;
     Eigen::Matrix<double, 1, 1> b_p;
     msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
     // init values
-    g << 0, 0, 9.81;	/// Gravity.
+    //g << 0, 0, 9.81;	/// Gravity.
     b_w << 0, 0, 0;		/// Bias gyroscopes.
     b_a << 0, 0, 0;		/// Bias accelerometer.
 
@@ -167,7 +167,7 @@ class PosePressureSensorManager : public msf_core::MSF_SensorManagerROS<
     p = q_wv.conjugate().toRotationMatrix() * p_vc / scale
         - q.toRotationMatrix() * p_ic;
 
-    a_m = q.inverse() * g;			/// Initial acceleration.
+    a_m = q.inverse() * msf_core::constants::GRAVITY;			/// Initial acceleration.
 
     // Prepare init "measurement".
     // True menas that we will also set the initial sensor readings.
