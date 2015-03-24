@@ -53,6 +53,8 @@ template<typename EKFState_T>
 struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
  protected:
   msf_core::MSF_CoreConfig config_;  ///< Dynamic reconfigure config.
+
+  mutable tf::TransformBroadcaster tf_broadcaster_;
  private:
 
   typedef typename EKFState_T::StateDefinition_T StateDefinition_T;
@@ -69,8 +71,6 @@ struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
   ros::Publisher pubCovCore_;  ///< Publishes the covariance matrix for the core states.
   ros::Publisher pubCovAux_;  ///< Publishes the covariance matrix for the auxiliary states.
   ros::Publisher pubCovCoreAux_; ///< Publishes the covariance matrix for the cross-correlations between core and auxiliary states.
-
-  mutable tf::TransformBroadcaster tf_broadcaster_;
 
   sensor_fusion_comm::ExtEkf hl_state_buf_;  ///< Buffer to store external propagation data.
 
@@ -224,6 +224,11 @@ struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
     }
   }
 
+  virtual void PublishAdditionalTF(
+      const shared_ptr<EKFState_T>& state) const {
+      UNUSED(state);
+  }
+
   virtual void PublishStateAfterUpdate(
       const shared_ptr<EKFState_T>& state) const {
     static int msg_seq = 0;
@@ -342,6 +347,7 @@ struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
           tf::StampedTransform(
               transform, ros::Time::now() /*ros::Time(latestState->time_)*/,
               "world", "state"));
+      PublishAdditionalTF(state);
     }
 
     if (pubCovCore_.getNumSubscribers()) {

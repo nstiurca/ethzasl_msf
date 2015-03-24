@@ -164,8 +164,8 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
     v << 0, 0, 0;			/// Robot velocity (IMU centered).
     w_m << 0, 0, 0;		/// Initial angular velocity.
 
-    q_wv.setIdentity();  // Vision-world rotation drift.
-    p_wv.setZero();  // Vision-world position drift.
+    //q_wv.setIdentity();  // Vision-world rotation drift.
+    //p_wv.setZero();  // Vision-world position drift.
 
     P.setZero();  // Error state covariance; if zero, a default initialization in msf_core is used
 
@@ -193,12 +193,23 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
     pnh.param("pose_sensor/init/q_ic/y", q_ic.y(), 0.0);
     pnh.param("pose_sensor/init/q_ic/z", q_ic.z(), 0.0);
     q_ic.normalize();
+    pnh.param("pose_sensor/init/p_wv/x", p_wv[0], 0.0);
+    pnh.param("pose_sensor/init/p_wv/y", p_wv[1], 0.0);
+    pnh.param("pose_sensor/init/p_wv/z", p_wv[2], 0.0);
+
+    pnh.param("pose_sensor/init/q_wv/w", q_wv.w(), 1.0);
+    pnh.param("pose_sensor/init/q_wv/x", q_wv.x(), 0.0);
+    pnh.param("pose_sensor/init/q_wv/y", q_wv.y(), 0.0);
+    pnh.param("pose_sensor/init/q_wv/z", q_wv.z(), 0.0);
+    q_wv.normalize();
+
+
 
     // Calculate initial attitude and position based on sensor measurements.
     if (q_cv.w() == 1) {  // If there is no pose measurement, only apply q_wv.
       q = q_wv;
     } else {  // If there is a pose measurement, apply q_ic and q_wv to get initial attitude.
-      q = (q_ic * q_cv.conjugate() * q_wv).conjugate();
+      q = (q_ic/*.conjugate()*/ * q_cv.conjugate() * q_wv).conjugate();
     }
 
     q.normalize();
@@ -300,6 +311,43 @@ class PoseSensorManager : public msf_core::MSF_SensorManagerROS<
       L_ << 0.1;
       delaystate.Set < StateDefinition_T::L > (L_);
     }
+  }
+
+  template<int P_IDX, int Q_IDX>
+  tf::StampedTransform makeStampedXform(const EKFState_T& state_const,
+          const double l, const ros::Time &t,
+          const std::string &parent, const std::string &child) const
+  {
+      const Eigen::Matrix<double, 3, 1> &p = state_const.template Get<P_IDX>();
+      const Eigen::Quaterniond        &ori = state_const.template Get<Q_IDX>();
+
+      return tf::StampedTransform(
+              tf::Transform(tf::Quaternion(ori.x(), ori.y(), ori.z(), ori.w()),
+                            tf::Vector3(p[0]*l, p[1]*l, p[2]*l)),
+              t, parent, child);
+  }
+
+
+  virtual void PublishAdditionalTF(const shared_ptr<EKFState_T>& state) const
+  {
+      const ros::Time t = ros::Time::now() /*ros::Time(latestState->time_)*/;
+      std::vector< tf::StampedTransform > vx;
+
+      const EKFState_T& state_const = *state;
+      const Eigen::Matrix<double, 1, 1> &L = state_const
+          .template Get<StateDefinition_T::L>();
+      const double &l = L(0,0);
+
+      vx.push_back(makeStampedXform<StateDefinition_T::p, StateDefinition_T::q>(
+                 state_const, l, t, "world_scaled", "imu_scaled"));
+
+      vx.push_back(makeStampedXform<StateDefinition_T::p_ic, StateDefinition_T::q_ic>(
+                 state_const, l, t, "imu_scaled", "camera_scaled"));
+
+      vx.push_back(makeStampedXform<StateDefinition_T::p_wv, StateDefinition_T::q_wv>(
+                 state_const, l, t, "world_scaled", "reconst_optical"));
+
+      tf_broadcaster_.sendTransform(vx);
   }
 };
 

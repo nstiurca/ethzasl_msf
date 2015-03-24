@@ -51,45 +51,57 @@ core/core_noise_gyrbias: 3e-7     # [rad/s^2/sqrt(Hz)]   (no idea from the datas
 #########Pose Sensor Parameters #######
 #######################################
 pose_sensor/pose_absolute_measurements: true
-pose_sensor/pose_measurement_world_sensor: false  # Selects if sensor measures its position 
+pose_sensor/pose_measurement_world_sensor: true  # Selects if sensor measures its position 
                                                   # w.r.t. world (true, e.g. Vicon) or the position 
                                                   # of the world coordinate system w.r.t. the 
                                                   # sensor (false, e.g. ethzasl_ptam).
-pose_sensor/pose_delay: 0.00                      # [s] delay of pose sensor w.r.t. imu
+pose_sensor/pose_delay: 0.05                      # [s] delay of pose sensor w.r.t. imu
 pose_sensor/pose_measurement_minimum_dt: 0.03  # Sets the minimum time in seconds between two pose measurements.
 
 # For the pose sensor noise levels use the std deviation the units are
 #  position: [m]
 #  orientation: [rad]
-pose_sensor/pose_use_fixed_covariance: true
-pose_sensor/pose_noise_meas_p: 0.10              # [m]
-pose_sensor/pose_noise_meas_q: 0.17              # [rad]
+pose_sensor/pose_use_fixed_covariance: false
+pose_sensor/pose_noise_meas_p: 0.05              # [m]
+pose_sensor/pose_noise_meas_q: 0.15              # [rad]
 
-pose_sensor/pose_initial_scale: 1
+pose_sensor/pose_initial_scale: 1.0
 pose_sensor/pose_fixed_scale: false
-pose_sensor/pose_noise_scale: 0.0     
+pose_sensor/pose_noise_scale: 0.0     # this was 0 originally
 
 # Transformation that expresses the position and orientation of the gravity aligned world frame 
 # w.r.t the vision/camera frame
-pose_sensor/pose_fixed_p_wv: false
+pose_sensor/pose_fixed_p_wv: true
 pose_sensor/pose_noise_p_wv: 0.0
-pose_sensor/pose_fixed_q_wv: false
-pose_sensor/pose_noise_q_wv: 0.0
+pose_sensor/pose_fixed_q_wv: true
+pose_sensor/pose_noise_q_wv: 0.0      # this was 0 originally
+
+#pose_sensor/init/q_wv/w:  0.5  #  0.0
+#pose_sensor/init/q_wv/x: -0.5  #  1
+#pose_sensor/init/q_wv/y:  0.5  # -1
+#pose_sensor/init/q_wv/z: -0.5  #  0
+#pose_sensor/init/p_wv/x: 0.0
+#pose_sensor/init/p_wv/y: 0.0
+#pose_sensor/init/p_wv/z: 0.0
+
 
 # Transformation that expresses the position and orientation of the pose-sensor w.r.t. the IMU 
 # frame of reference, expressed in the IMU frame of reference.
 pose_sensor/pose_fixed_p_ic: false      # this is true in viconpos_sensor_fix.yaml
-pose_sensor/pose_noise_p_ic: 0.0001     # this was 0 originally
+pose_sensor/pose_noise_p_ic: 0.0     # this was 0 originally
 pose_sensor/pose_fixed_q_ic: false      # this is ture in viconpos_sensor_fix.yaml
-pose_sensor/pose_noise_q_ic: 0.001      # this was 0 originally
+pose_sensor/pose_noise_q_ic: 0.0      # this was 0 originally
 
 pose_sensor/init/q_ic/w:  0.5  #  0.0
-pose_sensor/init/q_ic/x: -0.5  #  1
+pose_sensor/init/q_ic/x:  0.5  #  1
 pose_sensor/init/q_ic/y:  0.5  # -1
-pose_sensor/init/q_ic/z: -0.5  #  0
+pose_sensor/init/q_ic/z:  0.5  #  0
+#pose_sensor/init/q_ic/w:  1.0
+#pose_sensor/init/q_ic/x:  0.0
+#pose_sensor/init/q_ic/y:  0.0
+#pose_sensor/init/q_ic/z:  0.0
 pose_sensor/init/p_ic/x: 0.01
 pose_sensor/init/p_ic/y: -0.003
 pose_sensor/init/p_ic/z: 0.018
-
 
 
